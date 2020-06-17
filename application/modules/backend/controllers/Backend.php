@@ -1,0 +1,367 @@
+<?php
+
+/**
+ * 
+ */
+class Backend extends MY_Controller
+{
+	var $myweb, $user, $dw;
+	public function __construct()
+	{
+
+		parent::__construct();
+		$this->load->helper('url');
+		$this->_init();
+		$this->load->library('users/users_library');
+		$this->load->model('users/users_model');
+		$this->load->model('backend_model');
+
+		$this->myweb =  $this->backend_model->get_web();
+		$this->myuser =  $this->backend_model->get_user();
+		$this->dw =  $this->backend_model->get_list();
+	}
+	private function _init()
+	{
+		$this->output->set_template('tem_admin/tem_admin');
+	}
+	public function index()
+	{
+		$data['menu'] = 'home';
+		$data['web'] = $this->myweb;
+		$data['user'] = $this->myuser;
+		$data['list_all'] = $this->dw;
+		$this->load->view('deposit_withdraw', $data);
+	}
+	public function profile()
+	{
+		$data['menu'] = 'profile';
+		$this->load->view('profile', $data);
+	}
+	public function get_log()
+	{
+		if (isset($_POST['id'])) {
+			$q = $this->db
+				->select('tb_list_log.*, tb_user.name as name_user, tb_user.web_id as web_id, tb_web.name as web_name,  tb_login.username as admin_name')
+				->join('tb_login', 'tb_login.id=tb_list_log.admin_id')
+				->join('tb_user', 'tb_user.id=tb_list_log.user_id')
+				->join('tb_web', 'tb_web.id=tb_user.web_id')
+				->where('tb_list_log.id_list', $_POST['id'])
+				->order_by("tb_list_log.time_create_log", "DESC")
+				->get('tb_list_log');
+			echo json_encode($q->result());
+		}
+		die;
+	}
+	
+	public function recycle()
+	{
+		$data = array(				 
+			'status' => 2 
+		);
+
+		if($this->db->where('id',$this->input->post('id'))->update('tb_list', $data)){
+			echo json_encode( true); 
+		}else{
+			echo json_encode( false); 
+		}
+		
+		die();
+	}
+	public function remove()
+	{
+		$data = array(				 
+			'status' => 0 
+		);
+
+		if($this->db->where('id',$this->input->post('id'))->update('tb_list', $data)){
+			echo json_encode( true); 
+		}else{
+			echo json_encode( false); 
+		}
+		
+		die();
+	}
+	// ========== report  ============
+
+	public function report()
+	{
+		$date = date('Y-m-d');
+
+		$oth = 0;
+		$type = 0;
+		$s_web = 0;
+		$s_user = 0;
+
+		if (isset($_POST['oth'])) {
+			$oth = $_POST['oth'];
+			if ($_POST['oth'] != '-') {
+				switch ($_POST['oth']) {
+					case '0': //วันนี้
+						$begin = $date;
+						$end = $date;
+						break;
+					case '-1': //เมื่อวาน						
+						$date1 = str_replace('-', '/', $date);
+						$newd = date('Y-m-d', strtotime($date1 . "-1 days"));
+						$begin = $newd;
+						$end = $newd;
+						break;
+
+					case '7': //7 วันก่อน
+						$date1 = str_replace('-', '/', $date);
+						$newd = date('Y-m-d', strtotime($date1 . "-7 days"));
+						$begin = $newd;
+						$end = $date;
+						break;
+
+					case '1': //1 เดือน
+						$date1 = str_replace('-', '/', $date);
+						$newd = date('Y-m-d', strtotime($date1 . "-30 days"));
+						$begin = $newd;
+						$end = $date;
+						break;
+
+					case '3': //3 เดือน
+						$date1 = str_replace('-', '/', $date);
+						$newd = date('Y-m-d', strtotime($date1 . "-90 days"));
+						$begin = $newd;
+						$end = $date;
+						break;
+
+					case '6': //6 เดือน
+						$date1 = str_replace('-', '/', $date);
+						$newd = date('Y-m-d', strtotime($date1 . "-180 days"));
+						$begin = $newd;
+						$end = $date;
+						break;
+
+					default:
+						$begin = $date;
+						$end = $date;
+						break;
+				}
+			} else {
+				$oth = $_POST['oth'];
+				if (isset($_POST['datebegin']) && isset($_POST['dateend'])) {
+					$begin = $_POST['datebegin'];
+					$end = $_POST['dateend'];
+				} else {
+					$begin = $date;
+					$end = $date;
+				}
+			}
+		} else {
+			if (isset($_POST['datebegin']) && isset($_POST['dateend'])) {
+				$begin = $_POST['datebegin'];
+				$end = $_POST['dateend'];
+			} else {
+				$begin = $date;
+				$end = $date;
+			}
+		}
+		if (isset($_POST['type'])) {
+			$type = $_POST['type'];
+		}
+		if (isset($_POST['s_web'])) {
+			$s_web = $_POST['s_web'];
+		}
+		if (isset($_POST['s_user'])) {
+			$s_user = $_POST['s_user'];
+		}
+		$q = $this->db
+			->select('tb_list.*, tb_user.name as name_user, tb_user.web_id as web_id, tb_web.name as web_name,  tb_login.username as admin_name')
+			->join('tb_login', 'tb_login.id=tb_list.admin_id')
+			->join('tb_user', 'tb_user.id=tb_list.user_id')
+			->join('tb_web', 'tb_web.id=tb_user.web_id')
+			->where_in("tb_list.status",['1','2'])
+			->where("tb_list.time_create BETWEEN '$begin 00:00:00'  AND '$end 23:59:59'  ");
+		if ($type != 0) {
+			$this->db->where("tb_list.list", $type);
+		}
+		if ($s_web != 0) {
+			$this->db->where("tb_user.web_id", $s_web);
+		} else {
+			if ($s_user != 0) {
+				$this->db->where("tb_user.id", $s_user);
+			}
+		}
+
+		$q = $this->db->order_by("tb_list.time_create", "DESC")
+			->get('tb_list');
+
+
+		$data['menu'] = 'report';
+		$data['web'] = $this->myweb;
+		$data['user'] = $this->myuser;
+		$data['list_all'] = $q->result();
+		$data['begin'] = $begin;
+		$data['end'] = $end;
+		$data['oth'] = $oth;
+		$data['type'] = $type;
+		$data['s_web'] = $s_web;
+		$data['s_user'] = $s_user;
+		// die;
+		$this->load->view('report', $data);
+	}
+	// ========== deposit withdraw ============
+	public function deposit_withdraw()
+	{
+		$data['menu'] = 'deposit_withdraw';
+		$data['web'] = $this->myweb;
+		$data['user'] = $this->myuser;
+		$data['list_all'] = $this->dw;
+
+		$this->load->view('deposit_withdraw', $data);
+	}
+	public function addlist()
+	{
+		if (isset($_POST)) {
+			if (isset($_POST['bonus'])) {
+				$b = $this->input->post('bonus');
+			} else {
+				$b = 0;
+			}
+			$data = array(
+				'list' => $this->input->post('s_list'),
+				// '' => $this->input->post('s_web'),
+				'user_id' => $this->input->post('s_user'),
+				'total' => $this->input->post('total'),
+				'bonus' => $b,
+				'admin_id' => $_SESSION['users']['id'],
+
+			);
+
+			echo '<script>alert("' . $this->backend_model->save_list($data) . '");</script>';
+
+			redirect(base_url('backend/deposit_withdraw'), 'refresh');
+		}
+	}
+	public function editlist()
+	{
+		if (isset($_POST)) {
+			if (isset($_POST['bonus'])) {
+				$b = $this->input->post('bonus');
+			} else {
+				$b = 0;
+			}
+			$data = array(				 
+				'list' => $this->input->post('s_list'),
+				'user_id' => $this->input->post('s_user'),
+				'total' => $this->input->post('total'),
+				'bonus' => $b,
+				'status' => 2,
+			);
+
+			echo '<script>alert("' . $this->backend_model->edit_list($this->input->post('id'),$data) . '");</script>';
+
+			redirect(base_url('backend/deposit_withdraw'), 'refresh');
+		}
+	}
+	// ========== admin  ============
+	public function admin()
+	{
+		$data['menu'] = 'admin';
+		$data['admin'] = $this->backend_model->get_admin();;
+		
+		$this->load->view('admin', $data);
+	}
+	public function add_admin(){
+		$salt = $this->users_library->salt();
+		$pass = $this->users_library->hash_password($this->input->post('password'), $salt);
+		$data = array(				 
+			'username' => $this->input->post('username'),
+			'nickname' => $this->input->post('nickname'),
+			'password' => $pass,
+			'salt' => $salt,
+			'name' => $this->input->post('name'),
+			'sername' => $this->input->post('sername'),
+			'tel' => '',
+			'last_login' => date('Y-m-d H:i:s'),
+			'last_ip' => $this->input->ip_address()
+		);
+		$q = $this->db->insert('tb_login', $data);
+		if($q){
+			echo '<script>alert("เพิ่มแอดมินเรียบร้อย");</script>';
+
+			redirect(base_url('backend/admin'), 'refresh');
+		}else{
+			echo '<script>alert("ผิดพลาด");</script>';
+
+			redirect(base_url('backend/admin'), 'refresh');
+		}		
+	}
+	// ==========  user ============
+	public function user()
+	{
+		$data['menu'] = 'user';
+		$data['web'] = $this->myweb;
+		$data['user'] = $this->myuser;
+		$this->load->view('user', $data);
+	}
+	public function adduser()
+	{
+		if (isset($_POST)) {
+			$data = array(
+				'name' => $this->input->post('nameuser'),
+				'web_id' => $this->input->post('s_user'),
+			);
+
+			echo '<script>alert("' . $this->backend_model->save_user($data) . '");</script>';
+			redirect(base_url('backend/user'), 'refresh');
+		}
+	}
+	// ==========  web ============
+	public function web()
+	{
+		$data['menu'] = 'web';
+		$data['web'] = $this->myweb;
+		$this->load->view('web', $data);
+	}
+
+	public function addweb()
+	{
+		if (isset($_POST)) {
+			$data = array(
+				'name' => $this->input->post('webname'),
+			);
+
+			echo '<script>alert("' . $this->backend_model->save_web($data) . '");</script>';
+			redirect(base_url('backend/web'), 'refresh');
+		}
+	}
+
+
+
+	public function editpass(){
+		$password = $this->input->post('old_password');
+		$users = $this->users_model->find_users_by_user($_SESSION['users']['username']);
+
+		if($users){
+
+			if($this->users_library->hash_password($password,$users->salt) != $users->password){
+				echo '<script>alert("รหัสผ่านเดิมไม่ถูกต้อง");</script>';
+				redirect(base_url('backend/profile'), 'refresh');
+			}
+
+			$salt = $this->users_library->salt();
+			$newpass = $this->users_library->hash_password($this->input->post('password'), $salt);
+			$data = array(				 
+				'password' => $newpass,
+				'salt' => $salt ,
+			);
+			if($this->db->where('id',$_SESSION['users']['id'])->update('tb_login', $data)){
+				echo '<script>alert("เปลี่ยนรหัส สำเร็จ \n กรุณาเข้าสู่ระบบใหม่");</script>';
+				redirect(base_url('users/logout'), 'refresh');
+			}else{
+				echo '<script>alert("ผิดพลาด");</script>';
+				redirect(base_url('backend/profile'), 'refresh');
+			}	
+
+		}
+		
+
+		
+
+	}
+
+}
