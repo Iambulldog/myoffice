@@ -43,12 +43,12 @@
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label for="datebegin">ตั้งแต่วันที่</label>
-                                <input type="date" class="form-control  date" id="datebegin" name="datebegin" placeholder="วันที่เริ่ม" value="<?php echo $begin; ?>" required="">
+                                <input type="datetime-local" class="form-control  date" id="datebegin" name="datebegin" placeholder="วันที่เริ่ม" value="<?php echo str_replace(" ","T",$begin);  ?>" required="" onchange="c_date()">
 
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label for="dateend">ถึงวันที่</label>
-                                <input type="date" class="form-control  date " id="dateend" name="dateend" placeholder="วันที่สิ้นสุด" value="<?php echo $end; ?>" required="">
+                                <input type="datetime-local" class="form-control  date " id="dateend" name="dateend" placeholder="วันที่สิ้นสุด" value="<?php echo str_replace(" ","T",$end); ?>" required="" onchange="c_date()">
 
                             </div>
 
@@ -140,8 +140,8 @@
                  ตั้งแต่วันที่
                  <span class="m-0 font-weight-bold text-primary">
                  <?php 
-                 $begin = date("d/m/Y", strtotime($begin));  
-                 $end = date("d/m/Y", strtotime($end)); 
+                  $begin = date("d/m/Y h:i", strtotime(str_replace(" ","T",$begin)));  
+                  $end = date("d/m/Y h:i", strtotime(str_replace(" ","T",$end))); 
                     echo  $begin."</span> ถึงวันที่ <span class='m-0 font-weight-bold text-primary'>".$end;
                    ?></span>
         </h6>
@@ -160,6 +160,7 @@
                             <th>user</th>
                             <th>ยอด</th>
                             <th>โบนัส/แนะนำ</th>
+                            <th> เวลาสลิป </th>
                             <th>ผู้ลงรายการ</th>
                             <th>วันที่ลงรายการ</th>
                         </tr>
@@ -186,6 +187,7 @@
                                             echo "-";
                                         } ?><?= $val->total ?> </td>
                                 <td> <?= $val->bonus ?> </td>
+                                <td> <?= $val->slip ?> </td>
                                 <td> <?= $val->admin_name ?></td>
                                 <td> <?= $val->time_create ?> </td>
                             </tr>
@@ -195,6 +197,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
+                            <th></th>
                             <th></th>
                             <th></th>
                             <th></th>
@@ -244,8 +247,8 @@
                  $title .= "ตั้งแต่วันที่: ";
                  
                  
-                 $begin = date("d/m/Y", strtotime($begin));  
-                 $end = date("d/m/Y", strtotime($end)); 
+                 $begin = date("d/m/Y h:i", strtotime(str_replace(" ","T",$begin)));  
+                 $end = date("d/m/Y h:i", strtotime(str_replace(" ","T",$end)));  
                  $title .=  $begin." ถึงวันที่ ".$end;
                    ?>
 <script>
@@ -332,6 +335,7 @@ $('#s_user').val(0);
                     $(api.column(5).footer()).html(b);
                     $(api.column(6).footer()).html('');
                     $(api.column(7).footer()).html('');
+                    $(api.column(8).footer()).html('');
                    
             },
 
@@ -343,7 +347,10 @@ $('#s_user').val(0);
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-
+    function c_date() {
+    $('#oth').val('-');
+    $('#oth').selectpicker('refresh');
+}
 
     function changeweb(id) {
 

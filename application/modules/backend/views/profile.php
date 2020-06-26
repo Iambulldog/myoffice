@@ -41,7 +41,7 @@
               </ul>
               <div class="tab-content pt-3">
                 <div class="tab-pane active">
-                  <form class="form"  >
+                  <form class="form"  method="POST" action="backend/editprofile">
                     <div class="row">
                       <div class="col">
                         <div class="row">
@@ -62,14 +62,14 @@
                           <div class="col">
                             <div class="form-group">
                               <label>ชื่อเล่น</label>
-                              <input class="form-control" type="text" placeholder="<?php echo $_SESSION['users']['nickname'];?>" value="<?php echo $_SESSION['users']['nickname'];?>">
+                              <input class="form-control" type="text" name="nickname" placeholder="<?php echo $_SESSION['users']['nickname'];?>" value="<?php echo $_SESSION['users']['nickname'];?>">
                             </div>
                             
                           </div>
                           <div class="col">
                             <div class="form-group">
                               <label>&nbsp;</label>
-                              <button class="form-control btn btn-primary" type="text" >บันทึก</button>
+                              <button class="form-control btn btn-primary" type="submit" >บันทึก</button>
                             </div>
                             
                           </div>

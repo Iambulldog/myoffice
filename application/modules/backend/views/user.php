@@ -6,10 +6,11 @@
 
         <div class="container">
         <form method="post" action="adduser" id="f_user">
+        <input hidden name="id" id="id_user">
                 <div class="form-row">
                 <div class="form-group col-md-4">
                     <label for="inputState">WEB</label>
-                    <select id="s_user" name="s_user" class="form-control selectpicker" data-live-search="true" required >
+                    <select id="s_web" name="s_web" class="form-control selectpicker" data-live-search="true" required >
                         <option  selected >เลือก...</option>
                         <?php $i=1; foreach ($web as $k => $val) {?>
                             <option value="<?=$val->id?>"><?=$val->name?></option>
@@ -23,7 +24,9 @@
                     </div>
                 </div>
                
-                <button type="button" class="btn btn-success" onclick='check_f();'> บันทึกข้อมูล</button>
+                <button id="bt_f" type="button" class="btn btn-success" onclick='check_f();'>บันทึกข้อมูล</button>
+                &nbsp;&nbsp;&nbsp;
+                <button type="reset" class="btn btn-danger" id="bt_r">ยกเลิก</button>
                 </form>
 
         </div>
@@ -44,6 +47,7 @@
                             <th>ลำดับ</th>
                             <th>ชื่อ</th>
                             <th>ชื่อเว็บ</th>
+                            <th>แก้ไข</th>
                             
                         </tr>
                     </thead>
@@ -53,7 +57,9 @@
                             <td><?=$i; ?></td>
                             <td><?=$val->name;?></td>
                             <td><?=$val->web_name;?></td>
-                           
+                            <td>
+                                <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข"></i> 
+                            </td>
                         </tr>
                     <?php $i++;}?>
 
@@ -78,6 +84,24 @@
                 [10, 25, 50, "All"]
             ],
         });
+
+
+        $(".edit").click(function() {
+
+            // console.log($(this).data('datalist'));
+            var d = $(this).data('datalist');
+            $("#f_user").attr("action", "backend/edituser");
+            $("#bt_f").attr("class", "btn btn-warning");
+            $("#bt_f").text("แก้ไข");
+
+            $('#id_user').val(d.id);
+            $('#s_web').val(d.web_id);
+            $('#nameuser').val(d.name);
+            $('#s_web').selectpicker('refresh');
+        });
+
+
+
     });
 function check_f() {
     if($("#nameuser").val() != "" && $("#s_user").val() != "เลือก..."){

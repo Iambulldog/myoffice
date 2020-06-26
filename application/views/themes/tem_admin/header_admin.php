@@ -38,12 +38,18 @@
     <span> ฝาก/ถอน</span></a>
 </li>
 
-
+<li class="nav-item <?php if($menu == 'report2'){echo 'active';}?>">
+  <a class="nav-link <?php if($menu == 'report2'){echo 'active';}?>" href="<?php echo base_url(); ?>backend/report2">
+    <i class="fas fa-fw fa-chart-area"></i>
+    <span>รายงาน(รวม)</span></a>
+</li>
 <li class="nav-item <?php if($menu == 'report'){echo 'active';}?>">
   <a class="nav-link <?php if($menu == 'report'){echo 'active';}?>" href="<?php echo base_url(); ?>backend/report">
     <i class="fas fa-fw fa-chart-area"></i>
-    <span>รายงาน</span></a>
+    <span>รายงาน(ละเอียด)</span></a>
 </li>
+
+
 
 <!-- Divider -->
 <hr class="sidebar-divider">
@@ -59,11 +65,7 @@
     <span>ADMIN</span></a>
 </li>
 <?php } ?>
-<li class="nav-item <?php if($menu == 'profile'){echo 'active';}?>">
-  <a class="nav-link <?php if($menu == 'profile'){echo 'active';}?>" href="<?php echo base_url(); ?>backend/profile">
-    <i class="fas fa-fw fa-address-card"></i>
-    <span>profile</span></a>
-</li>
+
 
 
 <li class="nav-item <?php if($menu == 'user'){echo 'active';}?>">
@@ -78,7 +80,11 @@
     <span>WEB</span></a>
 </li>
 
-
+<li class="nav-item <?php if($menu == 'profile'){echo 'active';}?>">
+  <a class="nav-link <?php if($menu == 'profile'){echo 'active';}?>" href="<?php echo base_url(); ?>backend/profile">
+    <i class="fas fa-fw fa-address-card"></i>
+    <span>profile</span></a>
+</li>
 <!-- Nav Item - Tables -->
 <!-- <li class="nav-item">
   <a class="nav-link <?php if($menu == 'deposit'){echo 'active';}else{echo 'collapsed';}?>" href="tables.html">

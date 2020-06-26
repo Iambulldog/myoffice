@@ -44,9 +44,12 @@ public function get_list(){
 				->get('tb_list');
 	return $q->result();
 }
-public function save_list($data){
-
+public function save_list($data,$id_web){
+		$date = date('Y-m-d');
+		$newd = date('Y-m-d', strtotime($date . "-181 days"));
+		$this->db->where('time_create < ',$newd)->delete('tb_list');
 		$q = $this->db->insert('tb_list', $data);
+		$this->update_credit($id=0,$data,$id_web,$s=1);
 		if($q){
 			return ('บันทึกสำเร็จ');
 		}else{
@@ -54,7 +57,57 @@ public function save_list($data){
 		}		
 
 }
-public function edit_list($id,$data){
+public function update_credit($id,$data,$id_web,$s){
+	switch ($s) {
+		case 1://'add'
+			if($data['list'] == 1){
+
+				
+				$w = $this->db->where('id',$id_web)->get('tb_web')->row();
+				$data2 = array(
+					'credit' =>( floatval($w->credit) - $data['total'] - $data['bonus'] ),
+				);
+				$this->db->where('id',$id_web)->update('tb_web', $data2);
+			}
+			break;
+		case 2://'edit'
+			$q = $this->db->select('*')->where('id',$id)->get('tb_list')->row();
+			$w = $this->db->where('id',$id_web)->get('tb_web')->row();
+			if($data['list'] == 1){			
+				$n_total = 0;
+				if(floatval($data['total']) > floatval($q->total)){
+					$n_total = floatval($data['total']) - floatval($q->total);
+					$data2 = array(
+						'credit' =>( floatval($w->credit) - $n_total ),
+					);
+				}elseif (floatval($data['total']) < floatval($q->total)) {
+					$n_total =  floatval($q->total) - floatval($data['total']);
+					$data2 = array(
+						'credit' =>( floatval($w->credit) + $n_total ),
+					);
+				}else{
+					$n_total =  floatval($data['total']);
+					$data2 = array(
+						'credit' =>( floatval($w->credit) - $n_total ),
+					);
+				}
+			}elseif($data['list'] == 2){
+				$data2 = array(
+					'credit' =>( floatval($w->credit) + $q->total),
+				);
+			}
+			// $this->db->where('id',$id_web)->update('tb_web', $data2);
+			break;
+		case 3://'delete'
+			break;
+		case 4://'reduce'
+			break;
+	}
+	
+
+}
+public function edit_list($id,$data,$id_web){
+	$this->update_credit($id,$data,$id_web,$s=2);
 	$q = $this->db->select('*')->where('id',$id)->get('tb_list')->row();
 
 	// 1 ก๊อปของเดิม tb_list มาเซฟ tb_log  
@@ -65,9 +118,11 @@ public function edit_list($id,$data){
 		'list' => $q->list ,
 		'total' => $q->total ,
 		'bonus' => $q->bonus ,
+		'slip' => $q->slip ,
 		'admin_id' => $q->admin_id ,
 		'time_create' => $q->time_create 
 	);
+	
 
 	// 2 อัฟเดท tb_list 
 
@@ -112,7 +167,7 @@ public function edit_list($id,$data){
 
 	}
 // ===============  web  =================
-	public function save_web($data){
+public function save_web($data){
 		$ch =$this->db
 					->select('*')
 					->where('name',$data['name'])
@@ -130,8 +185,28 @@ public function edit_list($id,$data){
 
 	
 		
-	}
-	public function get_web(){
+}
+public function edit_web($id_web,$data){
+
+		$q = $this->db->where('id',$id_web)->update('tb_web', $data);
+		if($q){
+			return ('บันทึก '.$data['name'].' สำเร็จ');
+		}else{
+			return ('ไม่สามารถบันทึก '.$data['name'].' ได้');
+		}		
+
+}
+public function edit_user($id,$data){
+
+	$q = $this->db->where('id',$id)->update('tb_user', $data);
+	if($q){
+		return ('บันทึก '.$data['name'].' สำเร็จ');
+	}else{
+		return ('ไม่สามารถบันทึก '.$data['name'].' ได้');
+	}		
+
+}
+public function get_web(){
 		$q = $this->db
 					->select('*')
 					->get('tb_web');

@@ -26,7 +26,11 @@
   
 
 </head>
-
+<style>
+  .fas{
+    cursor: pointer;
+  }
+</style>
 <body id="page-top">
 
 <!-- Page Wrapper -->

@@ -8,4 +8,5 @@ $route['translate_uri_dashes'] = FALSE;
 
 // $route['api/(:any)'] = 'api/$1';
 $route['backend/(:any)'] = 'backend/$1';
+$route['users/(:any)'] = 'users/$1';
 // $route['frontend/(:any)'] = 'frontend/$1';
