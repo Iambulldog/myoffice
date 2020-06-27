@@ -260,9 +260,9 @@ $('#s_user').val(0);
                 }, 0);
                 $(api.column(0).footer()).html('');
                 $(api.column(1).footer()).html('');
-                $(api.column(2).footer()).html(d);
-                $(api.column(3).footer()).html(w);
-                $(api.column(4).footer()).html(b);
+                $(api.column(2).footer()).html(d.toFixed(2));
+                $(api.column(3).footer()).html(w.toFixed(2));
+                $(api.column(4).footer()).html(b.toFixed(2));
 
                
         },

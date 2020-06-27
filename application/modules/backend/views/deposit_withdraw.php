@@ -124,12 +124,12 @@
                                     <?php if ($_SESSION['users']['id'] == $val->admin_id) {
                                         if ($val->status != 0) {
                                     ?>
-                                            <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข"></i> |
-                                            <i class="fas fa-fw fa-trash remove" data-id="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="ลบ"></i>|
+                                            <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข" onclick="edit(this)"></i> |
+                                            <i class="fas fa-fw fa-trash remove" data-id="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="ลบ" onclick="del(this)"></i>|
 
                                         <?php } else { ?>
 
-                                            <i class="fas fa-fw fa-recycle recycle" data-id="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="กู้คืน"></i>
+                                            <!-- <i class="fas fa-fw fa-recycle recycle" data-id="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="กู้คืน"></i> -->
 
                                     <?php }
                                     } else {
@@ -137,7 +137,7 @@
                                     } ?>
 
                                     <?php if ($val->status == 2) { ?>
-                                        <i class="fas fa-fw fa-wrench log" data-id="<?= $val->id; ?>" data-placement="top" title="รายกการแก้ไข" data-toggle="modal" data-target="#exampleModalCenter"></i>
+                                        <i class="fas fa-fw fa-wrench log" data-id="<?= $val->id; ?>" data-placement="top" title="รายกการแก้ไข" data-toggle="modal" data-target="#exampleModalCenter" onclick="log(this)"></i>
                                     <?php } ?>
 
                                 </td>
@@ -259,84 +259,12 @@ var balance=0;
         });
         // ================  edit  =======================
         $(".edit").click(function() {
-            $('#total').removeAttr('disabled');
-            // console.log($(this).data('id'));
-            var d = $(this).data('datalist');
-            $("#f_list").attr("action", "backend/editlist");
-            $("#bt_f").attr("class", "btn btn-warning");
-            $("#bt_f").text("แก้ไข");
-
-
-            $('#id_list').val(d.id);
-            $('#s_list').val(d.list);
-            $('#s_web').val(d.web_id);
-            $('#s_user').val(d.user_id);
-            $('#total').val(d.total);
-            $('#bonus').val(d.bonus);
-            // console.log(GetFormattedDate(d.slip));
-
-            $('#slip').val(GetFormattedDate(d.slip));
-            $('#slip').removeAttr('disabled');
-            $('#bonus').attr('disabled', 'true');
-            $('.selectpicker').selectpicker('refresh');
+           
         });
         // ================== /remove ====================
         $(".remove").click(function() {
             // console.log($(this).data('id'));
 
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false
-            })
-            swalWithBootstrapButtons.fire({
-                title: 'ลบรายการ',
-                text: "ยืนยันการลบรายการหรือไม่",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'ยืนยัน!!!',
-                cancelButtonText: 'ยกเลิก!!!',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.value) {
-                    swalWithBootstrapButtons.fire(
-                        'ยืนยัน',
-                        'รายการจะยังอยู่ สามารถกู้คืนได้',
-                        'success'
-                    );
-                    // ====
-                    $.ajax({
-                        type: "POST",
-                        url: 'backend/remove',
-                        data: {
-                            data: $(this).data('id')
-                        },
-                        success: function(d) {
-                            if (d) {
-                                location.href = '<?php echo base_url('backend/deposit_withdraw') ?>';
-                            } else {
-                                console.log("0");
-
-                            }
-                        },
-                        dataType: 'json'
-                    });
-
-                    // ====
-
-                } else if (
-                    /* Read more about handling dismissals below */
-                    result.dismiss === Swal.DismissReason.cancel
-                ) {
-                    swalWithBootstrapButtons.fire(
-                        'ยกเลิก',
-                        ' :)',
-                        'error'
-                    )
-                }
-            });
         });
         // ================== /กู้คืน ====================
         $(".recycle").click(function() {
@@ -402,13 +330,82 @@ var balance=0;
         $(".log").click(function() {
             console.log($(this).data('id'));
 
-            var t = $('#tb_log').DataTable();
+     
+        });
+
+// ========================== Total ======================
+        $("#total").keyup(function(){
+
+          if( parseFloat($(this).val()) > parseFloat(balance)){
+            $("#total").val('');
+          }
+        });
+
+    });
+
+function del(t){
+    const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            })
+            swalWithBootstrapButtons.fire({
+                title: 'ลบรายการ',
+                text: "ยืนยันการลบรายการหรือไม่",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน!!!',
+                cancelButtonText: 'ยกเลิก!!!',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    swalWithBootstrapButtons.fire(
+                        'ยืนยัน',
+                        'รายการจะยังอยู่ สามารถกู้คืนได้',
+                        'success'
+                    );
+                    // ====
+                    $.ajax({
+                        type: "POST",
+                        url: 'backend/remove',
+                        data: {
+                            data: $(t).data('id')
+                        },
+                        success: function(d) {
+                            if (d) {
+                                location.href = '<?php echo base_url('backend/deposit_withdraw') ?>';
+                            } else {
+                                console.log("0");
+
+                            }
+                        },
+                        dataType: 'json'
+                    });
+
+                    // ====
+
+                } else if (
+                    /* Read more about handling dismissals below */
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire(
+                        'ยกเลิก',
+                        ' :)',
+                        'error'
+                    )
+                }
+            });
+}
+function log(h){
+    var t = $('#tb_log').DataTable();
             t.clear().draw();
             $.ajax({
                 type: "POST",
                 url: 'backend/get_log',
                 data: {
-                    id: $(this).data('id')
+                    id: $(h).data('id')
                 },
                 success: function(d) {
                     var c = 1;
@@ -441,20 +438,35 @@ var balance=0;
                 },
                 dataType: 'json'
             });
-        });
-
-// ========================== Total ======================
-        $("#total").keyup(function(){
-
-          if( parseFloat($(this).val()) > parseFloat(balance)){
-            $("#total").val('');
-          }
-        });
-
-    });
-
+}
+function edit(t){
+    $('#total').removeAttr('disabled');
+    document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+            // console.log($(this).data('id'));
+            var d = $(t).data('datalist');
+            $("#f_list").attr("action", "backend/editlist");
+            $("#bt_f").attr("class", "btn btn-warning");
+            $("#bt_f").text("แก้ไข");
 
 
+            $('#id_list').val(d.id);
+            $('#s_list').val(d.list);
+            $('#s_web').val(d.web_id);
+            $('#s_user').val(d.user_id);
+            $('#total').val(d.total);
+            $('#bonus').val(d.bonus);
+            // console.log(GetFormattedDate(d.slip));
+
+            $('#slip').val(GetFormattedDate(d.slip));
+            $('#slip').removeAttr('disabled');
+            $('#bonus').removeAttr('disabled');
+            balance = ($('#s_web').find('option:selected').data('web'));
+            $('#text_balance').text(' ไม่เกิน : '+parseFloat(balance));
+
+            $('.selectpicker').selectpicker('refresh');
+
+}
 
     function list(d) {
         if (d == 1) {

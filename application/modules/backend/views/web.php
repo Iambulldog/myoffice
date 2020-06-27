@@ -62,7 +62,7 @@
                             </td>
                             <?php if($_SESSION['users']['id']==1){?>
                                 <td>
-                                    <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข" ></i>
+                                    <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข" onclick="edit(this)"></i>
                                     
                                 </td>
                             <?php } ?>
@@ -94,7 +94,8 @@
 
 
         $(".edit").click(function() {
-          
+            document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
             var d = $(this).data('datalist');
             $("#f_addweb").attr("action", "backend/editweb");
             $("#bt_f").attr("class", "btn btn-warning");
@@ -117,7 +118,15 @@
 
        
     });
+    function edit(t){
+        var d = $(t).data('datalist');
+            $("#f_addweb").attr("action", "backend/editweb");
+            $("#bt_f").attr("class", "btn btn-warning");
+            $("#bt_f").text("แก้ไข");
 
+            $('#id_web').val(d.id);
+            $('#webname').val(d.name);
+}
     function check_f() {
         if($("#webname").val() != ""){
             if (confirm("ยืนยันการเพิ่มเว็บ "+$("#webname").val()) && $("#webname").val() != "") {  

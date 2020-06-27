@@ -65,7 +65,7 @@ public function update_credit($id,$data,$id_web,$s){
 				
 				$w = $this->db->where('id',$id_web)->get('tb_web')->row();
 				$data2 = array(
-					'credit' =>( floatval($w->credit) - $data['total'] - $data['bonus'] ),
+					'credit' =>( floatval($w->credit) - floatval($data['total']) - floatval($data['bonus']) ),
 				);
 				$this->db->where('id',$id_web)->update('tb_web', $data2);
 			}
@@ -76,27 +76,32 @@ public function update_credit($id,$data,$id_web,$s){
 			if($data['list'] == 1){			
 				$n_total = 0;
 				if(floatval($data['total']) > floatval($q->total)){
-					$n_total = floatval($data['total']) - floatval($q->total);
-					$data2 = array(
-						'credit' =>( floatval($w->credit) - $n_total ),
-					);
+					$n_total = floatval($data['total']) - floatval($q->total) ;
+					$c = ( floatval($w->credit) - floatval($n_total) );
 				}elseif (floatval($data['total']) < floatval($q->total)) {
 					$n_total =  floatval($q->total) - floatval($data['total']);
-					$data2 = array(
-						'credit' =>( floatval($w->credit) + $n_total ),
-					);
+					$c = ( floatval($w->credit) + floatval($n_total) );
 				}else{
-					$n_total =  floatval($data['total']);
-					$data2 = array(
-						'credit' =>( floatval($w->credit) - $n_total ),
-					);
+					$c = 0;
 				}
+				if(floatval($data['bonus']) > floatval($q->bonus)){
+					$n_bonus = floatval($data['bonus']) - floatval($q->bonus) ;
+					$c2 = ( floatval($w->credit) - floatval($n_bonus) );
+				}elseif (floatval($data['bonus']) < floatval($q->bonus)) {
+					$n_bonus =  floatval($q->bonus) - floatval($data['bonus']);
+					$c2 = ( floatval($w->credit) + floatval($n_bonus) );
+				}else{
+					$c2 =  0;
+				}
+				$data2 = array(
+					'credit' => floatval($c+ $c2),
+				);
 			}elseif($data['list'] == 2){
 				$data2 = array(
-					'credit' =>( floatval($w->credit) + $q->total),
+					'credit' =>( floatval($w->credit) + floatval($q->total) + floatval($q->bonus)),
 				);
 			}
-			// $this->db->where('id',$id_web)->update('tb_web', $data2);
+			$this->db->where('id',$id_web)->update('tb_web', $data2);
 			break;
 		case 3://'delete'
 			break;
@@ -107,9 +112,17 @@ public function update_credit($id,$data,$id_web,$s){
 
 }
 public function edit_list($id,$data,$id_web){
-	$this->update_credit($id,$data,$id_web,$s=2);
-	$q = $this->db->select('*')->where('id',$id)->get('tb_list')->row();
 
+	
+	$q = $this->db->select('*')->where('id',$id)->get('tb_list')->row();
+	// เปลี่ยนแค่ สลิปไม่ต้องอัปเครดิต
+	if($q->list == $data['list'] &&  $q->total == $data['total'] && $q->user_id == $data['user_id'] && $q->bonus == $data['bonus']){
+
+	}else{
+		$this->update_credit($id,$data,$id_web,$s=2);
+	}
+		
+	
 	// 1 ก๊อปของเดิม tb_list มาเซฟ tb_log  
 	// stdClass Object ( [id] => 1 [user_id] => 2 [list] => 2 [total] => 100.00 [bonus] => 0.00 [admin_id] => 1 [time_create] => 2020-06-15 09:32:34 [status] => 2 )
 	$data_log = array(				 
@@ -123,7 +136,6 @@ public function edit_list($id,$data,$id_web){
 		'time_create' => $q->time_create 
 	);
 	
-
 	// 2 อัฟเดท tb_list 
 
 	if($this->db->insert('tb_list_log', $data_log)){
@@ -144,6 +156,7 @@ public function edit_list($id,$data,$id_web){
 		$q = $this->db
 					->select('tb_user.*,tb_web.name as web_name ,tb_web.id as web_id')
 					->join('tb_web','tb_web.id=tb_user.web_id')
+					->order_by('tb_user.name', 'ASC')
 					->get('tb_user');
 		return $q->result();
 	}

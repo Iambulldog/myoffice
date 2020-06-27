@@ -58,7 +58,7 @@
                             <td><?=$val->name;?></td>
                             <td><?=$val->web_name;?></td>
                             <td>
-                                <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข"></i> 
+                                <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข" onclick="edit(this)"></i> 
                             </td>
                         </tr>
                     <?php $i++;}?>
@@ -89,7 +89,17 @@
         $(".edit").click(function() {
 
             // console.log($(this).data('datalist'));
-            var d = $(this).data('datalist');
+           
+        });
+
+
+
+    });
+
+function edit(t){
+    document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+    var d = $(t).data('datalist');
             $("#f_user").attr("action", "backend/edituser");
             $("#bt_f").attr("class", "btn btn-warning");
             $("#bt_f").text("แก้ไข");
@@ -98,11 +108,9 @@
             $('#s_web').val(d.web_id);
             $('#nameuser').val(d.name);
             $('#s_web').selectpicker('refresh');
-        });
+}
 
 
-
-    });
 function check_f() {
     if($("#nameuser").val() != "" && $("#s_user").val() != "เลือก..."){
                                 if (confirm("ยืนยันการเพิ่มผู้ใช้ "+$("#nameuser").val()) && $("#nameuser").val() != "") {  

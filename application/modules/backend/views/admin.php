@@ -98,7 +98,7 @@
                                  <?php if ($_SESSION['users']['id'] == 1) { ?>
                                      <td>
                                          <input name="repass" id="repass<?= $val->id ?>">
-                                         <i class="fas fa-fw fa-save pass" data-id="<?= $val->id ?>" data-placement="top" title="รีเซ็ตรหัส"></i>
+                                         <i class="fas fa-fw fa-save pass" data-id="<?= $val->id ?>" data-placement="top" title="รีเซ็ตรหัส" onclick="pass(this)"></i>
                                      </td>
                                  <?php } ?>
                              </tr>
@@ -149,8 +149,17 @@
          });
 
          $(".pass").click(function() {
-             if($('#repass' + $(this).data('id')).val() == ""){
-                $('#repass' + $(this).data('id')).focus();
+      
+
+         });
+
+
+     });
+
+function pass(t){
+    var did =  $(t).data('id');
+             if($('#repass' +did).val() == ""){
+                $('#repass' + did).focus();
              }else{
                 const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -170,22 +179,24 @@
                  reverseButtons: true
              }).then((result) => {
                  if (result.value) {
-                     swalWithBootstrapButtons.fire(
-                         'ยืนยัน',
-                         'รีเซ็ตรหัสผ่าน',
-                         'success'
-                     );
+                   
                      // ====
                      $.ajax({
                          type: "POST",
                          url: 'backend/repass',
                          data: {
-                             id: $(this).data('id'),
-                             pass: $('#repass' + $(this).data('id')).val(),
+                             id: did,
+                             pass: $('#repass' + did).val(),
                          },
                          success: function(d) {
                              if (d) {
-                                 Swal.fire('รีเซ็ตรหัสผ่านเรียบร้อย');
+                                //  Swal.fire('รีเซ็ตรหัสผ่านเรียบร้อย');
+                                $('#repass' + did).val("");
+                                 swalWithBootstrapButtons.fire(
+                                        'ยืนยัน',
+                                        'รีเซ็ตรหัสผ่านเรียบร้อย',
+                                        'success'
+                                    );
                              } else {
                                  console.log("0");
 
@@ -207,11 +218,9 @@
              });
              }
            
+}
 
-         });
 
-
-     });
 
      function numberWithCommas(x) {
          return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

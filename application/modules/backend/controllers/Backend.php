@@ -82,7 +82,7 @@ class Backend extends MY_Controller
 				$data2 = array(
 					'credit' => (floatval($w->credit) + floatval($q->total)),
 				);
-				// $this->db->where('id',$v['web_id'])->update('tb_web', $data2);
+				$this->db->where('id',$v['web_id'])->update('tb_web', $data2);
 			}
 
 			echo json_encode(true);
@@ -184,6 +184,7 @@ class Backend extends MY_Controller
 		}
 		if (isset($_POST['s_user'])) {
 			$s_user = $_POST['s_user'];
+
 		}
 		$q = $this->db
 			->select('tb_list.*, tb_user.name as name_user, tb_user.web_id as web_id, tb_web.name as web_name,  tb_login.username as admin_name')
@@ -197,11 +198,11 @@ class Backend extends MY_Controller
 		}
 		if ($s_web != 0) {
 			$this->db->where("tb_user.web_id", $s_web);
-		} else {
-			if ($s_user != 0) {
+		} 
+		if ($s_user != 0) {
 				$this->db->where("tb_user.id", $s_user);
-			}
 		}
+
 
 		$q = $this->db->order_by("tb_list.time_create", "DESC")
 			->get('tb_list');
@@ -633,9 +634,11 @@ class Backend extends MY_Controller
 
 	public function repass()
 	{
-		$d = $this->input->post('data');
-		$id =$d['id'];
-		$password = $d['pass'];
+
+		
+		 $id =$this->input->post('id');
+			$password = $this->input->post('pass');
+		
 		
 			$salt = $this->users_library->salt();
 			$newpass = $this->users_library->hash_password($password , $salt);
