@@ -41,9 +41,10 @@
 
 
                         </div>
+                        
                         <div class="col-md-4 mb-4">
                             <label for="datebegin">ตั้งแต่วันที่</label>
-                            <input type="datetime-local" class="form-control  date" id="datebegin" name="datebegin" placeholder="วันที่เริ่ม" value="<?php echo str_replace(" ","T",$begin);  ?>" required="" onchange="c_date()">
+                            <input type="datetime-local" class="form-control  date" id="datebegin" name="datebegin" placeholder="วันที่เริ่ม" value="<?php echo str_replace(" ","T",$begin);  ?>" required="" onchange="c_date(this.value)">
 
                         </div>
                         <div class="col-md-4 mb-4">
@@ -61,7 +62,9 @@
                                 <option value="0" selected> ทั้งหมด </option>
                                 <?php $i = 1;
                                 foreach ($web as $k => $val) { ?>
-                                    <option value="<?= $val->id ?>" <?php /*if ($s_web == $val->id) { echo "selected";  }*/?>><?= $val->name ?></option>
+                                    <option value="<?= $val->id ?>" <?php if ($s_web == $val->id) { echo "selected";  }?> >
+                                    <?= $val->name ?>
+                                    </option>
                                 <?php } ?>
                             </select>
                         </div>
@@ -275,7 +278,9 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function c_date() {
+function c_date(d) {
+    console.log(d);
+    
     $('#oth').val('-');
     $('#oth').selectpicker('refresh');
 }

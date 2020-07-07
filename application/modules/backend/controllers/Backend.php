@@ -52,7 +52,19 @@ class Backend extends MY_Controller
 		}
 		die;
 	}
-
+	public function get_weblog()
+	{
+		if (isset($_POST['id'])) {
+			$q = $this->db
+				->select('tb_web_log.*, tb_web.name as webname')
+				->join('tb_web', 'tb_web.id=tb_web_log.id_web')
+				->where('tb_web_log.id_web', $_POST['id'])
+				->order_by("tb_web_log.date_create", "DESC")
+				->get('tb_web_log');
+			echo json_encode($q->result());
+		}
+		die;
+	}
 	public function recycle()
 	{
 		$data = array(
@@ -97,7 +109,9 @@ class Backend extends MY_Controller
 	public function report()
 	{
 		$date = date('Y-m-d');
-
+		$now = date('Y-m-d H:i');
+		$cBegin = date('Y-m-d H:i', strtotime($now));
+		 $cEnd = date('Y-m-d H:i', strtotime($date." 11:00"));
 		$oth = 0;
 		$type = 0;
 		$s_web = 0;
@@ -108,72 +122,106 @@ class Backend extends MY_Controller
 			if ($_POST['oth'] != '-') {
 				switch ($_POST['oth']) {
 					case '0': //วันนี้
-						$begin = $date." 11:00";
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+							if($cBegin < $cEnd){
+								$begin = date('Y-m-d', strtotime($date . "-1 days"))." 11:00";
+								$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+							}else{
+								$begin = $date." 11:00";
+								$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
+							}
 						break;
-					case '-1': //เมื่อวาน						
+					case '-1': //เมื่อวาน			
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-1 days"));
-						$begin = $newd;
-						$end = $newd;
+						$newd = date('Y-m-d', strtotime($date1 . "-1 days"));
+						if($cBegin < $cEnd){
+							$begin = date('Y-m-d', strtotime($newd . "-1 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '7': //7 วันก่อน
+
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-7 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-7 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '1': //1 เดือน
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-30 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-30 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '3': //3 เดือน
+						
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-90 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-90 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '6': //6 เดือน
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-180 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-180 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
+						
+						
+						
 						break;
 
 					default:
+					if($cBegin < $cEnd){
+						$begin = date('Y-m-d', strtotime($date . "-1 days"))." 11:00";
+						$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+					}else{
 						$begin = $date." 11:00";
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
+					}	
+						
 						break;
 				}
 			} else {
-				$oth = $_POST['oth'];
 				if (isset($_POST['datebegin']) && isset($_POST['dateend'])) {
-					$begin = (explode("T", $_POST['datebegin']));
-					$begin = $begin[0] . " " . $begin[1];
-
-					$end = (explode("T", $_POST['dateend']));
-					$end = $end[0] . " " . $end[1];
+					$begin = $_POST['datebegin'];
+					$end = $_POST['dateend'];
 				} else {
 					$begin = $date." 11:00";
-					$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+					$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
 				}
 			}
 		} else {
 			if (isset($_POST['datebegin']) && isset($_POST['dateend'])) {
-				$begin = (explode("T", $_POST['datebegin']));
-				$begin = $begin[0] . " " . $begin[1];
-
-				$end = (explode("T", $_POST['dateend']));
-				$end = $end[0] . " " . $end[1];
+				$begin = $_POST['datebegin'];
+				$end = $_POST['dateend'];
 			} else {
 				$begin = $date." 11:00";
-				$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+				$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
 			}
 		}
 		if (isset($_POST['type'])) {
@@ -226,7 +274,9 @@ class Backend extends MY_Controller
 	public function report2()
 	{
 		$date = date('Y-m-d');
-
+		$now = date('Y-m-d H:i');
+		$cBegin = date('Y-m-d H:i', strtotime($now));
+		$cEnd = date('Y-m-d H:i', strtotime($date." 11:00"));
 		$oth = 0;
 
 		$s_web = 0;
@@ -236,72 +286,106 @@ class Backend extends MY_Controller
 			if ($_POST['oth'] != '-') {
 				switch ($_POST['oth']) {
 					case '0': //วันนี้
-						$begin = $date." 11:00";
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+							if($cBegin < $cEnd){
+								$begin = date('Y-m-d', strtotime($date . "-1 days"))." 11:00";
+								$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+							}else{
+								$begin = $date." 11:00";
+								$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
+							}
 						break;
-					case '-1': //เมื่อวาน						
+					case '-1': //เมื่อวาน			
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-1 days"));
-						$begin = $newd;
-						$end = $newd;
+						$newd = date('Y-m-d', strtotime($date1 . "-1 days"));
+						if($cBegin < $cEnd){
+							$begin = date('Y-m-d', strtotime($newd . "-1 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '7': //7 วันก่อน
+
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-7 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-7 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '1': //1 เดือน
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-30 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-30 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '3': //3 เดือน
+						
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-90 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-90 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
 						break;
 
 					case '6': //6 เดือน
 						$date1 = str_replace('-', '/', $date);
-						$newd = date('Y-m-d H:i', strtotime($date1 . "-180 days"));
-						$begin = $newd;
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$newd = date('Y-m-d', strtotime($date1 . "-180 days"));
+						if($cBegin < $cEnd){
+							$begin = $newd." 11:00";
+							$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+						}else{
+							$begin = date('Y-m-d', strtotime($newd . "0 days"))." 11:00";
+							$end = date('Y-m-d', strtotime($date . "0 days"))." 10:59";
+						}	
+						
+						
+						
 						break;
 
 					default:
+					if($cBegin < $cEnd){
+						$begin = date('Y-m-d', strtotime($date . "-1 days"))." 11:00";
+						$end = date('Y-m-d', strtotime($date . "-1 days"))." 10:59";
+					}else{
 						$begin = $date." 11:00";
-						$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+						$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
+					}	
+						
 						break;
 				}
 			} else {
-				$oth = $_POST['oth'];
 				if (isset($_POST['datebegin']) && isset($_POST['dateend'])) {
-					$begin = (explode("T", $_POST['datebegin']));
-					$begin = $begin[0] . " " . $begin[1];
-
-					$end = (explode("T", $_POST['dateend']));
-					$end = $end[0] . " " . $end[1];
+					$begin = $_POST['datebegin'];
+					$end = $_POST['dateend'];
 				} else {
 					$begin = $date." 11:00";
-					$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+					$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
 				}
 			}
 		} else {
 			if (isset($_POST['datebegin']) && isset($_POST['dateend'])) {
-				$begin = (explode("T", $_POST['datebegin']));
-				$begin = $begin[0] . " " . $begin[1];
-
-				$end = (explode("T", $_POST['dateend']));
-				$end = $end[0] . " " . $end[1];
+				$begin = $_POST['datebegin'];
+				$end = $_POST['dateend'];
 			} else {
 				$begin = $date." 11:00";
-				$end = date('Y-m-d 10:59', strtotime($date . "+1 days"));
+				$end = date('Y-m-d', strtotime($date . "+1 days"))." 10:59";
 			}
 		}
 		if (isset($_POST['type'])) {
@@ -597,7 +681,7 @@ class Backend extends MY_Controller
 
 			);
 
-			echo '<script>alert("' . $this->backend_model->edit_web($this->input->post('id'), $data) . '");</script>';
+			echo '<script>alert("' . $this->backend_model->edit_web($this->input->post('id'), $data,$this->input->post('credit')) . '");</script>';
 			redirect(base_url('backend/web'), 'refresh');
 		}
 	}

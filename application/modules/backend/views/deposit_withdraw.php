@@ -479,20 +479,26 @@ function edit(t){
 
     function changeweb(t) {
 
-       
         $('#total').removeAttr('disabled');
-balance = ($(t).find('option:selected').data('web'));
+        balance = ($(t).find('option:selected').data('web'));
         $('#text_balance').text(' ไม่เกิน : '+parseFloat(balance));
-var id = $(t).val();
+        var id = $(t).val();
         $('#s_user').val(0);
         $('#s_user').selectpicker('refresh');
         if (id != 0) {
             $("#s_user option").each(function() {
-                $(this).hide();
+                // console.log(this);
+                
+                this.disabled = true;
                 if ($(this).data("webid") == id) {
-                    $(this).show();
+                    $(this).removeAttr('disabled');
+                    $(this).removeAttr('style');
+                    $('#s_user').selectpicker('refresh');
                 } else {
+                    $('#s_user').selectpicker('refresh');
                     $(this).hide();
+                    this.disabled = true;
+                    
                 }
                 $('#s_user').selectpicker('refresh');
             });
@@ -500,6 +506,7 @@ var id = $(t).val();
         } else {
            
             $("#s_user option").each(function() {
+                this.disabled = true;
                 $(this).hide();
                 $('#s_user').selectpicker('refresh');
             });

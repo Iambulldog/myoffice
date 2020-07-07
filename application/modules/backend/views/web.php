@@ -62,10 +62,14 @@
                             </td>
                             <?php if($_SESSION['users']['id']==1){?>
                                 <td>
-                                    <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข" onclick="edit(this)"></i>
-                                    
+                                    <i class="fas fa-fw fa-edit edit" data-datalist="<?= htmlspecialchars(json_encode($val, JSON_UNESCAPED_UNICODE), ENT_COMPAT); ?>" data-placement="top" title="แก้ไข" onclick="edit(this)"></i>|
+                                    <i class="fas fa-fw fa-wrench log" data-id="<?= $val->id; ?>" data-placement="top" title="รายกการแก้ไข" data-toggle="modal" data-target="#exampleModalCenter" onclick="log(this)"></i>
                                 </td>
+                                
+                                   
+                               
                             <?php } ?>
+                            
                         </tr>
                     <?php $i++;}?>
 
@@ -79,7 +83,55 @@
 </div>
 
 
+<!-- Modal -->
+<style>
+    .modal-dialog {
+        /* Width */
+        max-width: 90%;
+        width: auto !important;
+    }
 
+    td i {
+        cursor: pointer;
+    }
+</style>
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">บันทึกการแก้ไข</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="mb-0 table table-hover" id="tb_log" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>เว็บ</th>
+                                <th>ยอด</th>
+                                <th> เวลาลงรายการ </th>
+                                <th> IP </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <script>
@@ -118,6 +170,38 @@
 
        
     });
+
+    function log(h){
+    var t = $('#tb_log').DataTable();
+            t.clear().draw();
+            $.ajax({
+                type: "POST",
+                url: 'backend/get_weblog',
+                data: {
+                    id: $(h).data('id')
+                },
+                success: function(d) {
+                    var c = 1;
+                    console.log(d);
+                    $.each(d, function(key, val) {
+  
+                        t.row.add([
+                            c,
+                            val.webname,
+                            val.credit,
+                            val.date_create,
+                            val.ip,
+                        ]).draw(false);
+                        c++;
+                    });
+
+
+
+                },
+                dataType: 'json'
+            });
+}
+
     function edit(t){
         var d = $(t).data('datalist');
             $("#f_addweb").attr("action", "backend/editweb");
